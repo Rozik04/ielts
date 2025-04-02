@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Center {
+  id       Int     @id @default(autoincrement())
+  name     String
+  document String
+  location String
+  regionId Int
+  image    String?
+  status   String
+  password String
+  email    String @unique
+  Region   Region @relation(fields: [regionId], references: [id])
+  Teachers Teacher[]
+}
+
+
+
+model Teacher {
+  id          Int      @id @default(autoincrement())
+  fullname    String
+  email       String   @unique
+  password    String
+  phone       String
+  sertificate String?
+  status      String
+  image       String?
+  centerId    Int
+  Center      Center   @relation(fields: [centerId], references: [id])
+  Groups      Group[]
+}
+
+
+
+model Group {
+  id              Int      @id @default(autoincrement())
+  name            String
+  teacherId       Int
+  startTime       DateTime
+  endTime         DateTime
+  avarageScore    Float?
+  checkerTeacherId Int?
+  Teacher         Teacher  @relation(fields: [teacherId], references: [id])
+  Students        Student[]
+}
+
+
+
+model Student {
+  id       Int     @id @default(autoincrement())
+  fullname String
+  groupId  Int
+  password String
+  phone    String @unique
+  Group    Group  @relation(fields: [groupId], references: [id])
+  Exams    Exam[]
+}
+
+model Exam {
+  id               Int     @id @default(autoincrement())
+  readingVariantId  Int
+  writingVariantId  Int
+  listeningVariantId Int
+  speakingVariantId Int
+  studentId        Int
+  Student          Student @relation(fields: [studentId], references: [id])
+  Result           Result?
+}
+
+model Region {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  Centers Center[]
+}
+
+model Result {
+  id               Int     @id @default(autoincrement())
+  examId           Int     @unique
+  speakingScore    Float?
+  writingScore     Float?
+  listeningScore   Float?
+  readingScore     Float?
+  examenarTeacherId Int?
+  speakingComment  String?
+  writingComment   String?
+  Exam             Exam    @relation(fields: [examId], references: [id])
+}
+
+model ReadingVariant {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  ReadingBlocks ReadingBlock[]
+}
+
+model ReadingBlock {
+  id              Int    @id @default(autoincrement())
+  blockName       String
+  readingVariantId Int
+  ReadingVariant  ReadingVariant @relation(fields: [readingVariantId], references: [id])
+  ReadingQuestions ReadingQuestion[]
+}
+
+model ReadingQuestion {
+  id            Int    @id @default(autoincrement())
+  questionText  String
+  readingBlockId Int
+  ReadingBlock  ReadingBlock @relation(fields: [readingBlockId], references: [id])
+}
+
+model WritingVariant {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  WritingBlocks WritingBlock[]
+}
+
+model WritingBlock {
+  id             Int    @id @default(autoincrement())
+  blockName      String
+  writingVariantId Int
+  description    String?
+  task          String?
+  image         String?
+  WritingVariant WritingVariant @relation(fields: [writingVariantId], references: [id])
+}
+
+
